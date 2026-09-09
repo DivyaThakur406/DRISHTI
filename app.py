@@ -2,8 +2,11 @@ import streamlit as st
 import pandas as pd
 import re
 import math
+import requests
 
 from datetime import datetime
+
+BACKEND_URL = "http://127.0.0.1:8000"
 
 
 # ============================================================
@@ -327,21 +330,20 @@ if "last_analysis" not in st.session_state:
 
 # ============================================================
 # DISASTER LOCATION DATABASE
+# Prototype data note: No government incident records are used in this prototype.
 # ============================================================
 
 LOCATION_COORDINATES = {
 
-    "srinagar": (34.0837, 74.7973),
-
-    "pahalgam": (34.0160, 75.3150),
-
-    "anantnag": (33.7310, 75.1480),
-
-    "baramulla": (34.2090, 74.3420),
-
-    "jammu": (32.7266, 74.8570),
-
-    "kathua": (32.3867, 75.5182)
+    "sikkim": (27.5330, 88.5122),
+    "arunachal pradesh": (28.2180, 94.7278),
+    "assam": (26.2006, 92.9376),
+    "meghalaya": (25.4670, 91.3662),
+    "nagaland": (26.1584, 94.5624),
+    "manipur": (24.6637, 93.9063),
+    "mizoram": (23.1645, 92.9376),
+    "tripura": (23.9408, 91.9882),
+    "jammu & kashmir": (33.7782, 76.5762)
 
 }
 
@@ -353,64 +355,65 @@ LOCATION_COORDINATES = {
 RESOURCES = [
 
     {
-        "name": "NDRF Rescue Team A",
+        "name": "NER Rescue Team A",
         "type": "Rescue Team",
-        "location": "Srinagar",
-        "lat": 34.0700,
-        "lon": 74.7850,
+        "location": "Sikkim",
+        "lat": 27.5330,
+        "lon": 88.5122,
         "capacity": 10,
         "status": "AVAILABLE"
     },
 
     {
-        "name": "Rescue Team B",
+        "name": "Mountain Rescue Team B",
         "type": "Rescue Team",
-        "location": "Pahalgam",
-        "lat": 34.0250,
-        "lon": 75.3000,
-        "capacity": 6,
+        "location": "Arunachal Pradesh",
+        "lat": 28.2180,
+        "lon": 94.7278,
+        "capacity": 8,
         "status": "AVAILABLE"
     },
 
     {
-        "name": "District Hospital Srinagar",
-        "type": "Hospital",
-        "location": "Srinagar",
-        "lat": 34.0850,
-        "lon": 74.8000,
-        "capacity": 150,
+        "name": "Emergency Medical Unit",
+        "type": "Medical Unit",
+        "location": "Meghalaya",
+        "lat": 25.4670,
+        "lon": 91.3662,
+        "capacity": 40,
         "status": "AVAILABLE"
     },
 
     {
         "name": "Emergency Shelter 01",
         "type": "Shelter",
-        "location": "Srinagar",
-        "lat": 34.0900,
-        "lon": 74.7800,
-        "capacity": 250,
+        "location": "Mizoram",
+        "lat": 23.1645,
+        "lon": 92.9376,
+        "capacity": 200,
         "status": "AVAILABLE"
     },
 
     {
-        "name": "Emergency Shelter 02",
-        "type": "Shelter",
-        "location": "Pahalgam",
-        "lat": 34.0200,
-        "lon": 75.2900,
-        "capacity": 150,
-        "status": "AVAILABLE"
-    },
-
-    {
-        "name": "Fire & Emergency Unit",
-        "type": "Fire & Rescue",
-        "location": "Anantnag",
-        "lat": 33.7400,
-        "lon": 75.1600,
-        "capacity": 8,
+        "name": "Rapid Response Unit",
+        "type": "Rescue Team",
+        "location": "Manipur",
+        "lat": 24.6637,
+        "lon": 93.9063,
+        "capacity": 7,
         "status": "BUSY"
+    },
+
+    {
+        "name": "Mountain Response Unit",
+        "type": "Rescue Team",
+        "location": "Jammu & Kashmir",
+        "lat": 33.7782,
+        "lon": 76.5762,
+        "capacity": 8,
+        "status": "AVAILABLE"
     }
+
 ]
 
 
@@ -423,76 +426,77 @@ if "incidents" not in st.session_state:
     st.session_state.incidents = [
 
         {
-            "id": "INC-1042",
-            "type": "Flood",
-            "location": "Srinagar",
-            "lat": 34.0837,
-            "lon": 74.7973,
+            "id": "INC-2042",
+            "type": "Landslide",
+            "location": "Sikkim",
+            "lat": 27.5330,
+            "lon": 88.5122,
             "severity": "CRITICAL",
-            "confidence": 94,
-            "affected": 120,
+            "confidence": 92,
+            "affected": 65,
             "status": "ACTIVE",
             "description":
-                "Water has entered residential areas. "
-                "Several families reported trapped.",
+                "Synthetic prototype report: slope movement indicators "
+                "suggest a possible road blockage.",
             "source":
-                "Citizen + Official",
+                "Synthetic Sensor Simulation",
             "time":
                 "12 min ago"
         },
 
         {
-            "id": "INC-1041",
+            "id": "INC-2041",
             "type": "Landslide",
-            "location": "Pahalgam",
-            "lat": 34.0160,
-            "lon": 75.3150,
+            "location": "Arunachal Pradesh",
+            "lat": 28.2180,
+            "lon": 94.7278,
             "severity": "HIGH",
-            "confidence": 88,
+            "confidence": 87,
             "affected": 42,
             "status": "ACTIVE",
             "description":
-                "Road blocked after slope failure. "
-                "Vehicles stranded.",
+                "Synthetic prototype report: elevated rainfall and "
+                "slope instability detected.",
             "source":
-                "Citizen Report",
+                "Synthetic Environmental Simulation",
             "time":
                 "28 min ago"
         },
 
         {
-            "id": "INC-1040",
-            "type": "Flash Flood",
-            "location": "Anantnag",
-            "lat": 33.7310,
-            "lon": 75.1480,
+            "id": "INC-2040",
+            "type": "Landslide",
+            "location": "Meghalaya",
+            "lat": 25.4670,
+            "lon": 91.3662,
             "severity": "HIGH",
-            "confidence": 91,
-            "affected": 76,
+            "confidence": 89,
+            "affected": 38,
             "status": "ACTIVE",
             "description":
-                "Rapid water rise near low-lying settlements.",
+                "Synthetic prototype report: high soil moisture combined "
+                "with unstable terrain conditions.",
             "source":
-                "Weather + Citizen",
+                "Synthetic Environmental Simulation",
             "time":
                 "41 min ago"
         },
 
         {
-            "id": "INC-1039",
-            "type": "Earthquake",
-            "location": "Baramulla",
-            "lat": 34.2090,
-            "lon": 74.3420,
-            "severity": "MEDIUM",
-            "confidence": 81,
-            "affected": 18,
+            "id": "INC-2039",
+            "type": "Landslide",
+            "location": "Jammu & Kashmir",
+            "lat": 33.7782,
+            "lon": 76.5762,
+            "severity": "HIGH",
+            "confidence": 85,
+            "affected": 25,
             "status": "MONITORING",
             "description":
-                "Tremors reported. No major structural "
-                "damage confirmed.",
+                "Synthetic prototype report: elevated slope and terrain "
+                "instability conditions.",
             "source":
-                "Citizen Report",
+                "Synthetic Sensor Simulation",
             "time":
                 "1 hr ago"
         }
@@ -1379,6 +1383,8 @@ def sidebar_navigation():
         "Navigation",
         [
             "Command Center",
+            "Landslide Risk Monitoring",
+            "NER Risk Map",
             "AI Incident Analyzer",
             "Incident Verification",
             "Resource Allocation",
@@ -2059,8 +2065,455 @@ def command_center():
             unsafe_allow_html=True
         )
         # ============================================================
+# LANDSLIDE RISK MONITORING
+# ============================================================
+
+def landslide_risk_monitoring():
+    # Keep the latest analyses for a simple risk trend.
+    if "landslide_risk_history" not in st.session_state:
+        st.session_state.landslide_risk_history = []
+
+
+    st.markdown(
+        """
+        <div class="hero">
+            <h1>⛰️ Landslide Risk Monitoring</h1>
+            <p>
+                AI-based environmental risk assessment and
+                early warning for landslide-prone regions.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # NER LOCATION
+    st.markdown(
+        '<div class="section-title">📍 Northeast Region</div>',
+        unsafe_allow_html=True
+    )
+
+    ner_locations = [
+        "Sikkim",
+        "Arunachal Pradesh",
+        "Assam",
+        "Meghalaya",
+        "Nagaland",
+        "Manipur",
+        "Mizoram",
+        "Tripura",
+        "Jammu & Kashmir"
+    ]
+
+    selected_region = st.selectbox(
+        "Select monitoring region",
+        ner_locations
+    )
+
+    st.info(
+        f"📡 Monitoring landslide risk for **{selected_region}**"
+    )
+
+    st.markdown(
+        '<div class="section-title">🌦️ Environmental Conditions</div>',
+        unsafe_allow_html=True
+    )
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        rainfall = st.slider("🌧️ Rainfall Risk", 0, 100, 70)
+        soil_moisture = st.slider("💧 Soil Moisture", 0, 100, 65)
+
+    with col2:
+        slope = st.slider("⛰️ Slope Risk", 0, 100, 60)
+        elevation = st.slider("🏔️ Elevation Exposure", 0, 100, 50)
+
+    with col3:
+        vegetation_loss = st.slider("🌱 Vegetation Loss", 0, 100, 40)
+        terrain_instability = st.slider("⚠️ Terrain Instability", 0, 100, 60)
+
+    st.write("")
+
+    if st.button(
+        "🔍 ANALYZE LANDSLIDE RISK",
+        use_container_width=True,
+        type="primary"
+    ):
+        try:
+            response = requests.post(
+                f"{BACKEND_URL}/risk/predict",
+                json={
+                    "rainfall": rainfall,
+                    "soil_moisture": soil_moisture,
+                    "slope": slope,
+                    "elevation": elevation,
+                    "vegetation_loss": vegetation_loss,
+                    "terrain_instability": terrain_instability
+                },
+                timeout=10
+            )
+
+            if response.status_code == 200:
+                result = response.json()
+                risk_score = result["risk_score"]
+                risk_level = result["risk_level"]
+                warning = result["early_warning"]
+                confidence = float(result.get("confidence", 0))
+
+                c1, c2, c3 = st.columns(3)
+
+                with c1:
+                    st.metric("LANDSLIDE RISK", f"{risk_score} / 100")
+
+                with c2:
+                    st.metric("RISK LEVEL", risk_level)
+
+                with c3:
+                    st.metric(
+                        "EARLY WARNING",
+                        "ACTIVE" if warning else "NORMAL"
+                    )
+
+                st.caption(f"🤖 Random Forest confidence: {confidence:.1f}%")
+
+                if risk_level == "CRITICAL":
+                    st.error(
+                        "🚨 CRITICAL LANDSLIDE RISK — "
+                        "EARLY WARNING ACTIVE"
+                    )
+                elif risk_level == "HIGH":
+                    st.warning(
+                        "⚠️ HIGH LANDSLIDE RISK — "
+                        "PRECAUTIONARY ACTION ADVISED"
+                    )
+                elif risk_level == "MODERATE":
+                    st.info(
+                        "🟡 MODERATE LANDSLIDE RISK — "
+                        "CONTINUE MONITORING"
+                    )
+                else:
+                    st.success("🟢 LOW LANDSLIDE RISK")
+
+                # AI DECISION SUPPORT — RECOMMENDED ACTIONS
+                st.markdown(
+                    '<div class="section-title">🚨 AI Recommended Actions</div>',
+                    unsafe_allow_html=True
+                )
+
+                if risk_level == "CRITICAL":
+                    st.error(
+                        """
+                        **🔴 IMMEDIATE ACTION REQUIRED**
+
+                        • Issue an early warning for vulnerable areas.  
+                        • Restrict access to high-risk slopes and exposed routes.  
+                        • Deploy nearby response resources and keep evacuation support ready.  
+                        • Increase monitoring frequency and reassess environmental conditions.
+                        """
+                    )
+                elif risk_level == "HIGH":
+                    st.warning(
+                        """
+                        **🟠 PREPARE RESPONSE**
+
+                        • Increase monitoring of vulnerable slopes.  
+                        • Inspect roads, settlements and other exposed locations.  
+                        • Keep response teams and essential resources on standby.  
+                        • Reassess the risk if rainfall or soil moisture increases.
+                        """
+                    )
+                elif risk_level == "MODERATE":
+                    st.info(
+                        """
+                        **🟡 ENHANCED MONITORING**
+
+                        • Continue monitoring rainfall and soil moisture.  
+                        • Watch for rapid changes in slope or terrain conditions.  
+                        • Review vulnerable locations and maintain response readiness.
+                        """
+                    )
+                else:
+                    st.success(
+                        """
+                        **🟢 ROUTINE MONITORING**
+
+                        • Continue routine environmental monitoring.  
+                        • Maintain normal response readiness.  
+                        • Recalculate risk if environmental conditions change.
+                        """
+                    )
+
+                st.caption(
+                    "Decision-support recommendations are generated from the calculated "
+                    "prototype risk level. Final operational decisions remain with authorized responders."
+                )
+
+                # RISK TREND
+                st.session_state.landslide_risk_history.append({
+                    "Analysis": len(st.session_state.landslide_risk_history) + 1,
+                    "Risk Score": float(risk_score)
+                })
+
+                # Keep only the latest 10 analyses.
+                st.session_state.landslide_risk_history = (
+                    st.session_state.landslide_risk_history[-10:]
+                )
+
+                st.markdown(
+                    '<div class="section-title">📈 Risk Trend</div>',
+                    unsafe_allow_html=True
+                )
+
+                trend_df = pd.DataFrame(
+                    st.session_state.landslide_risk_history
+                )
+
+                st.line_chart(
+                    trend_df.set_index("Analysis")["Risk Score"],
+                    y_label="Risk Score (0–100)",
+                    x_label="Analysis"
+                )
+
+                if len(trend_df) >= 2:
+                    previous_score = float(trend_df.iloc[-2]["Risk Score"])
+                    current_score = float(trend_df.iloc[-1]["Risk Score"])
+
+                    if current_score > previous_score:
+                        st.warning(
+                            f"📈 Risk is increasing: "
+                            f"{previous_score:.1f} → {current_score:.1f}"
+                        )
+                    elif current_score < previous_score:
+                        st.success(
+                            f"📉 Risk is decreasing: "
+                            f"{previous_score:.1f} → {current_score:.1f}"
+                        )
+                    else:
+                        st.info(
+                            f"➡️ Risk is stable at {current_score:.1f}/100"
+                        )
+
+
+            else:
+                st.error(
+                    f"Risk prediction service returned "
+                    f"status {response.status_code}."
+                )
+
+        except requests.RequestException:
+            st.error(
+                "Unable to connect to DRISHTI backend. "
+                "Make sure FastAPI is running."
+            )
+
+
+# ============================================================
 # AI INCIDENT ANALYZER
 # ============================================================
+
+def ner_landslide_risk_map():
+    """NER + J&K risk overview using synthetic environmental conditions."""
+    st.markdown(
+        '<div class="hero"><h1>🗺️ NER + J&K Landslide Risk Map</h1>'
+        '<p>Environmental-condition based landslide risk assessment</p></div>',
+        unsafe_allow_html=True
+    )
+
+    # Synthetic environmental inputs for prototype demonstration.
+    # These are NOT government incident records and are not presented as live risk.
+    synthetic_environment = {
+        "Sikkim": {
+            "latitude": 27.5330, "longitude": 88.5122,
+            "rainfall": 85, "soil_moisture": 78, "slope": 90,
+            "elevation": 82, "vegetation_loss": 45, "terrain_instability": 80
+        },
+        "Arunachal Pradesh": {
+            "latitude": 28.2180, "longitude": 94.7278,
+            "rainfall": 78, "soil_moisture": 74, "slope": 86,
+            "elevation": 88, "vegetation_loss": 40, "terrain_instability": 75
+        },
+        "Assam": {
+            "latitude": 26.2006, "longitude": 92.9376,
+            "rainfall": 62, "soil_moisture": 65, "slope": 35,
+            "elevation": 25, "vegetation_loss": 30, "terrain_instability": 40
+        },
+        "Meghalaya": {
+            "latitude": 25.4670, "longitude": 91.3662,
+            "rainfall": 82, "soil_moisture": 76, "slope": 72,
+            "elevation": 65, "vegetation_loss": 38, "terrain_instability": 68
+        },
+        "Nagaland": {
+            "latitude": 26.1584, "longitude": 94.5624,
+            "rainfall": 68, "soil_moisture": 66, "slope": 64,
+            "elevation": 62, "vegetation_loss": 35, "terrain_instability": 58
+        },
+        "Manipur": {
+            "latitude": 24.6637, "longitude": 93.9063,
+            "rainfall": 75, "soil_moisture": 72, "slope": 70,
+            "elevation": 60, "vegetation_loss": 42, "terrain_instability": 70
+        },
+        "Mizoram": {
+            "latitude": 23.1645, "longitude": 92.9376,
+            "rainfall": 80, "soil_moisture": 75, "slope": 82,
+            "elevation": 58, "vegetation_loss": 48, "terrain_instability": 78
+        },
+        "Tripura": {
+            "latitude": 23.9408, "longitude": 91.9882,
+            "rainfall": 58, "soil_moisture": 60, "slope": 42,
+            "elevation": 30, "vegetation_loss": 28, "terrain_instability": 38
+        },
+        "Jammu & Kashmir": {
+            "latitude": 33.7782, "longitude": 76.5762,
+            "rainfall": 65, "soil_moisture": 58, "slope": 80,
+            "elevation": 90, "vegetation_loss": 35, "terrain_instability": 72
+        },
+    }
+
+    def calculate_region_risk(values):
+        """Send synthetic environmental conditions through the same FastAPI risk engine."""
+        try:
+            response = requests.post(
+                f"{BACKEND_URL}/risk/predict",
+                json={
+                    "rainfall": values["rainfall"],
+                    "soil_moisture": values["soil_moisture"],
+                    "slope": values["slope"],
+                    "elevation": values["elevation"],
+                    "vegetation_loss": values["vegetation_loss"],
+                    "terrain_instability": values["terrain_instability"],
+                },
+                timeout=5
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException:
+            # Fallback keeps the map usable if FastAPI is temporarily unavailable.
+            risk = (
+                values["rainfall"] * 0.30
+                + values["soil_moisture"] * 0.20
+                + values["slope"] * 0.20
+                + values["elevation"] * 0.10
+                + values["vegetation_loss"] * 0.10
+                + values["terrain_instability"] * 0.10
+            )
+            risk = round(min(max(risk, 0), 100), 2)
+            if risk >= 80:
+                level, warning = "CRITICAL", True
+            elif risk >= 60:
+                level, warning = "HIGH", True
+            elif risk >= 40:
+                level, warning = "MODERATE", False
+            else:
+                level, warning = "LOW", False
+            return {
+                "risk_score": risk,
+                "risk_level": level,
+                "early_warning": warning
+            }
+
+    rows = []
+    for region, values in synthetic_environment.items():
+        result = calculate_region_risk(values)
+        rows.append({
+            "Region": region,
+            "Latitude": values["latitude"],
+            "Longitude": values["longitude"],
+            "Risk Score": result["risk_score"],
+            "Risk Level": result["risk_level"],
+            "Early Warning": "ACTIVE" if result["early_warning"] else "MONITOR"
+        })
+
+    risk_data = pd.DataFrame(rows)
+
+    st.info(
+        "🧪 Prototype mode: risk values are calculated from synthetic environmental "
+        "conditions. No government incident records are used."
+    )
+
+    st.markdown(
+        '<div class="section-title">📍 Regional Risk Overview</div>',
+        unsafe_allow_html=True
+    )
+
+    selected_map_region = st.selectbox(
+        "Select a region to inspect",
+        risk_data["Region"].tolist(),
+        key="ner_map_region"
+    )
+
+    selected = risk_data[risk_data["Region"] == selected_map_region].iloc[0]
+
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.metric("RISK SCORE", f'{float(selected["Risk Score"]):.1f}/100')
+    with c2:
+        st.metric("RISK LEVEL", selected["Risk Level"])
+    with c3:
+        st.metric("EARLY WARNING", selected["Early Warning"])
+
+    map_points = risk_data.rename(
+        columns={"Latitude": "lat", "Longitude": "lon"}
+    )[["lat", "lon"]]
+
+    st.map(map_points, zoom=5)
+
+    st.caption(
+        "Map locations are representative coordinates. Environmental values are "
+        "synthetic demo inputs; a deployed system can replace them with validated "
+        "sensor, weather, satellite, or other authorized environmental feeds."
+    )
+
+    st.markdown(
+        '<div class="section-title">🌦️ Environmental Conditions Used</div>',
+        unsafe_allow_html=True
+    )
+
+    env = synthetic_environment[selected_map_region]
+    e1, e2, e3 = st.columns(3)
+    with e1:
+        st.metric("RAINFALL RISK", env["rainfall"])
+        st.metric("SOIL MOISTURE", env["soil_moisture"])
+    with e2:
+        st.metric("SLOPE RISK", env["slope"])
+        st.metric("ELEVATION EXPOSURE", env["elevation"])
+    with e3:
+        st.metric("VEGETATION LOSS", env["vegetation_loss"])
+        st.metric("TERRAIN INSTABILITY", env["terrain_instability"])
+
+    st.markdown(
+        '<div class="section-title">📊 Regional Risk Table</div>',
+        unsafe_allow_html=True
+    )
+
+    st.dataframe(
+        risk_data[["Region", "Risk Score", "Risk Level", "Early Warning"]],
+        use_container_width=True,
+        hide_index=True
+    )
+
+    score = float(selected["Risk Score"])
+    if score >= 80:
+        st.error(
+            f"🚨 {selected_map_region}: CRITICAL risk. "
+            "Immediate response review and intensified monitoring recommended."
+        )
+    elif score >= 60:
+        st.warning(
+            f"⚠️ {selected_map_region}: HIGH risk. "
+            "Increase monitoring and prepare response resources."
+        )
+    elif score >= 40:
+        st.info(
+            f"🟡 {selected_map_region}: MODERATE risk. "
+            "Continue monitoring environmental conditions."
+        )
+    else:
+        st.success(
+            f"🟢 {selected_map_region}: LOW risk. "
+            "Continue routine monitoring."
+        )
+
 
 def ai_incident_analyzer():
 
@@ -2527,525 +2980,180 @@ def incident_verification():
     st.markdown(
         """
         <div class="hero">
-
-            <h1>
-                🔎 Incident Verification Center
-            </h1>
-
+            <h1>🔎 Incident Verification Center</h1>
             <p>
-                Cross-source intelligence helps DRISHTI
-                identify credible incidents, reduce duplicates,
-                and prioritize verified emergencies.
+                DRISHTI validates synthetic environmental and citizen-report
+                signals to prioritize potential landslide incidents.
             </p>
-
         </div>
         """,
         unsafe_allow_html=True
     )
 
-
-    # --------------------------------------------------------
-    # TOP SUMMARY
-    # --------------------------------------------------------
+    # Prototype-only incident set.
+    # This page intentionally does not use government incident records.
+    verification_incidents = [
+        {
+            "id": "INC-2042", "type": "Landslide", "location": "Sikkim",
+            "lat": 27.5330, "lon": 88.5122, "severity": "CRITICAL",
+            "confidence": 92, "affected": 65, "status": "ACTIVE",
+            "description": "Synthetic report: elevated rainfall, soil moisture and slope instability indicate a potential landslide zone.",
+            "source": "Synthetic Environmental Simulation", "time": "12 min ago"
+        },
+        {
+            "id": "INC-2041", "type": "Landslide", "location": "Arunachal Pradesh",
+            "lat": 28.2180, "lon": 94.7278, "severity": "HIGH",
+            "confidence": 87, "affected": 42, "status": "ACTIVE",
+            "description": "Synthetic report: heavy rainfall conditions combined with steep terrain require increased monitoring.",
+            "source": "Synthetic Environmental Simulation", "time": "28 min ago"
+        },
+        {
+            "id": "INC-2040", "type": "Landslide", "location": "Meghalaya",
+            "lat": 25.4670, "lon": 91.3662, "severity": "HIGH",
+            "confidence": 89, "affected": 38, "status": "ACTIVE",
+            "description": "Synthetic report: high soil moisture and terrain instability detected in a vulnerable zone.",
+            "source": "Synthetic Environmental Simulation", "time": "41 min ago"
+        },
+        {
+            "id": "INC-2039", "type": "Landslide", "location": "Mizoram",
+            "lat": 23.1645, "lon": 92.9376, "severity": "HIGH",
+            "confidence": 86, "affected": 31, "status": "ACTIVE",
+            "description": "Synthetic report: steep slope conditions and vegetation loss increase landslide susceptibility.",
+            "source": "Synthetic Environmental Simulation", "time": "55 min ago"
+        },
+        {
+            "id": "INC-2038", "type": "Landslide", "location": "Manipur",
+            "lat": 24.6637, "lon": 93.9063, "severity": "HIGH",
+            "confidence": 84, "affected": 27, "status": "ACTIVE",
+            "description": "Synthetic report: elevated terrain instability combined with wet soil conditions.",
+            "source": "Synthetic Environmental Simulation", "time": "1 hr ago"
+        },
+        {
+            "id": "INC-2037", "type": "Landslide", "location": "Jammu & Kashmir",
+            "lat": 33.7782, "lon": 76.5762, "severity": "HIGH",
+            "confidence": 85, "affected": 25, "status": "ACTIVE",
+            "description": "Synthetic report: steep slopes, high elevation exposure and terrain instability require monitoring.",
+            "source": "Synthetic Environmental Simulation", "time": "1 hr ago"
+        },
+        {
+            "id": "INC-2036", "type": "Landslide", "location": "Nagaland",
+            "lat": 26.1584, "lon": 94.5624, "severity": "MODERATE",
+            "confidence": 78, "affected": 18, "status": "ACTIVE",
+            "description": "Synthetic report: moderate rainfall and slope conditions indicate continued monitoring.",
+            "source": "Synthetic Environmental Simulation", "time": "1 hr ago"
+        },
+        {
+            "id": "INC-2035", "type": "Landslide", "location": "Tripura",
+            "lat": 23.9408, "lon": 91.9882, "severity": "MODERATE",
+            "confidence": 74, "affected": 12, "status": "ACTIVE",
+            "description": "Synthetic report: moderate environmental risk indicators detected.",
+            "source": "Synthetic Environmental Simulation", "time": "2 hrs ago"
+        },
+    ]
 
     st.markdown(
-        '<div class="section-title">'
-        '📡 Information Sources'
-        '</div>',
+        '<div class="section-title">📡 Prototype Information Signals</div>',
         unsafe_allow_html=True
     )
-
 
     c1, c2, c3, c4 = st.columns(4)
 
-
     with c1:
-
-        st.metric(
-            "👤 Citizen Reports",
-            "14"
-        )
-
-
+        st.metric("👤 Synthetic Reports", "14")
     with c2:
-
-        st.metric(
-            "🏛️ Official Alerts",
-            "2"
-        )
-
-
+        st.metric("🌦️ Environmental Signals", "6")
     with c3:
-
-        st.metric(
-            "🌦️ Weather Signals",
-            "6"
-        )
-
-
+        st.metric("🛰️ Terrain Signals", "4")
     with c4:
+        st.metric("🤖 AI Confidence", "91%")
 
-        st.metric(
-            "📰 News Signals",
-            "9"
-        )
-
-
-    st.write("")
-
-
-    # ========================================================
-    # SELECT INCIDENT
-    # ========================================================
+    st.caption(
+        "Prototype mode: these verification records are synthetic examples "
+        "for demonstration and are not government incident records."
+    )
 
     st.markdown(
-        '<div class="section-title">'
-        '🚨 Select Incident for Verification'
-        '</div>',
+        '<div class="section-title">🚨 Select Incident for Verification</div>',
         unsafe_allow_html=True
     )
 
-
-    active_incidents = [
-
-        incident
-
-        for incident
-        in st.session_state.incidents
-
-        if incident["status"] == "ACTIVE"
-
-    ]
-
-
-    if not active_incidents:
-
-        st.info(
-            "No active incidents available for verification."
-        )
-
-        return
-
-
     incident_options = {
-
-        f'{incident["id"]} — '
-        f'{incident["type"]} — '
-        f'{incident["location"]}':
-            incident
-
-        for incident
-        in active_incidents
-
+        f'{incident["id"]} — {incident["type"]} — {incident["location"]}': incident
+        for incident in verification_incidents
     }
 
-
     selected_label = st.selectbox(
-
         "Choose an incident",
-
-        list(
-            incident_options.keys()
-        )
-
+        list(incident_options.keys()),
+        key="verification_incident_selector"
     )
 
-
-    selected_incident = incident_options[
-        selected_label
-    ]
-
+    selected_incident = incident_options[selected_label]
 
     st.write("")
 
-
-    # ========================================================
-    # INCIDENT OVERVIEW
-    # ========================================================
-
-    overview_col1, overview_col2 = st.columns(
-        [1.4, 1]
-    )
-
+    overview_col1, overview_col2 = st.columns([1.4, 1])
 
     with overview_col1:
-
-        severity = selected_incident[
-            "severity"
-        ]
-
+        severity = selected_incident["severity"]
 
         if severity == "CRITICAL":
-
-            severity_text = "🔴 CRITICAL"
-
+            st.error(f'🚨 {severity} — Immediate verification required')
         elif severity == "HIGH":
-
-            severity_text = "🟠 HIGH"
-
+            st.warning(f'⚠️ {severity} — Priority verification required')
         else:
-
-            severity_text = "🔵 MEDIUM"
-
+            st.info(f'🟡 {severity} — Continue monitoring')
 
         st.markdown(
             f"""
-            <div class="card">
+            **Location:** {selected_incident["location"]}
 
-                <div class="muted">
-                    INCIDENT OVERVIEW
-                </div>
+            **Incident:** {selected_incident["type"]}
 
-                <h2>
-                    {selected_incident["type"]}
-                    —
-                    {selected_incident["location"]}
-                </h2>
+            **Description:** {selected_incident["description"]}
 
-                <p>
-                    {selected_incident["description"]}
-                </p>
+            **Signal source:** {selected_incident["source"]}
 
-                <hr>
-
-                <b>Incident ID:</b>
-                {selected_incident["id"]}
-
-                <br><br>
-
-                <b>Severity:</b>
-                {severity_text}
-
-                <br><br>
-
-                <b>People affected:</b>
-                {selected_incident["affected"]}
-
-                <br><br>
-
-                <b>Initial AI confidence:</b>
-                {selected_incident["confidence"]}%
-
-            </div>
-            """,
-            unsafe_allow_html=True
+            **Reported:** {selected_incident["time"]}
+            """
         )
-
 
     with overview_col2:
+        st.metric("AI CONFIDENCE", f'{selected_incident["confidence"]}%')
+        st.metric("EST. AFFECTED", selected_incident["affected"])
+        st.metric("STATUS", selected_incident["status"])
 
-        st.markdown(
-            """
-            <div class="card">
-
-                <div class="muted">
-                    VERIFICATION STATUS
-                </div>
-
-                <h2>
-                    🟢 HIGH CONFIDENCE
-                </h2>
-
-                <p>
-                    Multiple information signals
-                    support the reported incident.
-                </p>
-
-                <div style="
-                    background:#16344b;
-                    border-radius:10px;
-                    height:12px;
-                    margin-top:18px;
-                ">
-
-                    <div style="
-                        background:#22c55e;
-                        width:94%;
-                        height:12px;
-                        border-radius:10px;
-                    ">
-                    </div>
-
-                </div>
-
-                <p style="
-                    text-align:right;
-                    margin-top:8px;
-                    color:#86efac;
-                    font-weight:700;
-                ">
-                    94% confidence
-                </p>
-
-            </div>
-            """,
-            unsafe_allow_html=True
+        st.progress(
+            min(selected_incident["confidence"] / 100, 1.0),
+            text=f'{selected_incident["confidence"]}% confidence'
         )
 
-
-    # ========================================================
-    # SOURCE CORRELATION
-    # ========================================================
-
-    st.write("")
-
     st.markdown(
-        '<div class="section-title">'
-        '🔗 Multi-Source Correlation'
-        '</div>',
+        '<div class="section-title">🧠 Verification Signals</div>',
         unsafe_allow_html=True
     )
 
+    signal_col1, signal_col2, signal_col3 = st.columns(3)
 
-    source_data = pd.DataFrame({
-
-        "Information Source": [
-
-            "👤 Citizen Reports",
-
-            "🏛️ Official Emergency Alert",
-
-            "🌦️ Weather / Sensor Signal",
-
-            "📰 News / Media Reports",
-
-            "📍 Location Consistency",
-
-            "🔁 Duplicate Detection"
-
-        ],
-
-        "Evidence": [
-
-            "7 reports",
-
-            "1 matching alert",
-
-            "Rainfall warning detected",
-
-            "3 matching reports",
-
-            "Same affected region",
-
-            "4 duplicate reports linked"
-
-        ],
-
-        "Confidence Contribution": [
-
-            "HIGH",
-
-            "VERY HIGH",
-
-            "MEDIUM",
-
-            "MEDIUM",
-
-            "HIGH",
-
-            "HIGH"
-
-        ],
-
-        "Status": [
-
-            "✓ CONFIRMED",
-
-            "✓ CONFIRMED",
-
-            "✓ CORROBORATED",
-
-            "✓ CORROBORATED",
-
-            "✓ MATCHED",
-
-            "✓ CLUSTERED"
-
-        ]
-
-    })
-
-
-    st.dataframe(
-
-        source_data,
-
-        hide_index=True,
-
-        use_container_width=True
-
-    )
-
-
-    # ========================================================
-    # DUPLICATE DETECTION
-    # ========================================================
-
-    st.write("")
-
-    duplicate_col1, duplicate_col2 = st.columns(
-        [1, 1]
-    )
-
-
-    with duplicate_col1:
-
-        st.markdown(
-            """
-            <div class="card">
-
-                <h3>
-                    🔁 Duplicate Detection
-                </h3>
-
-                <p>
-                    DRISHTI identified multiple reports
-                    describing the same incident.
-                </p>
-
-                <h2>
-                    4 reports → 1 incident
-                </h2>
-
-                <div class="muted">
-                    Duplicate reports are clustered
-                    to prevent inflated incident counts.
-                </div>
-
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-
-    with duplicate_col2:
-
-        st.markdown(
-            """
-            <div class="card">
-
-                <h3>
-                    📍 Location Correlation
-                </h3>
-
-                <p>
-                    Reports from nearby locations
-                    are compared to identify
-                    the same disaster event.
-                </p>
-
-                <h2>
-                    ✓ Location Match
-                </h2>
-
-                <div class="muted">
-                    Spatial consistency increases
-                    confidence in the incident.
-                </div>
-
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-
-    # ========================================================
-    # FINAL VERDICT
-    # ========================================================
-
-    st.write("")
+    with signal_col1:
+        st.metric("Rainfall Signal", "ELEVATED")
+    with signal_col2:
+        st.metric("Slope Signal", "ELEVATED")
+    with signal_col3:
+        st.metric("Terrain Signal", "ELEVATED")
 
     st.markdown(
-        '<div class="section-title">'
-        '🎯 Verification Verdict'
-        '</div>',
+        '<div class="section-title">📍 Incident Location</div>',
         unsafe_allow_html=True
     )
 
+    location_df = pd.DataFrame([{
+        "lat": selected_incident["lat"],
+        "lon": selected_incident["lon"]
+    }])
 
-    st.success(
-        "✓ VERIFIED INCIDENT — "
-        "Multiple independent information signals "
-        "support this event."
-    )
+    st.map(location_df, zoom=6)
 
-
-    verdict_col1, verdict_col2, verdict_col3 = (
-        st.columns(3)
-    )
-
-
-    with verdict_col1:
-
-        st.metric(
-            "Verification Score",
-            "94%"
-        )
-
-
-    with verdict_col2:
-
-        st.metric(
-            "Independent Sources",
-            "4"
-        )
-
-
-    with verdict_col3:
-
-        st.metric(
-            "Duplicate Reports",
-            "4 → 1"
-        )
-
-
-    # ========================================================
-    # OPERATIONAL DECISION
-    # ========================================================
-
-    st.write("")
-
-    st.markdown(
-        """
-        <div class="ai-result">
-
-            <div class="ai-title">
-                ⚡ OPERATIONAL DECISION
-            </div>
-
-            <p>
-                The incident has sufficient evidence
-                to enter the emergency response queue.
-            </p>
-
-            <p>
-                🚑 Recommended:
-                <b>
-                    Dispatch response resources
-                </b>
-            </p>
-
-            <p>
-                🏥 Recommended:
-                <b>
-                    Check nearby medical capacity
-                </b>
-            </p>
-
-            <p>
-                📢 Recommended:
-                <b>
-                    Issue targeted emergency notification
-                </b>
-            </p>
-
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-    # ============================================================
-# SMART RESOURCE ALLOCATION
-# ============================================================
 
 def resource_allocation():
 
@@ -4089,9 +4197,20 @@ else:
 
 
     # --------------------------------------------------------
+    # LANDSLIDE RISK MONITORING
+    # --------------------------------------------------------
+
+    elif selected_page == "Landslide Risk Monitoring":
+
+        landslide_risk_monitoring()
+
+
+    # --------------------------------------------------------
     # AI INCIDENT ANALYZER
     # --------------------------------------------------------
 
+    elif selected_page == "NER Risk Map":
+        ner_landslide_risk_map()
     elif selected_page == "AI Incident Analyzer":
 
         ai_incident_analyzer()

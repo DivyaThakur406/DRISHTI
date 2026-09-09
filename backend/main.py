@@ -1,14 +1,13 @@
 from fastapi import FastAPI
-
 from .database import Base, engine
-from .routes import incidents
+from .routes import incidents, landslide
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="DRISHTI Backend")
 
 app.include_router(incidents.router)
-
+app.include_router(landslide.router)
 
 @app.get("/")
 def home():

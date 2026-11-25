@@ -1,6 +1,9 @@
 # 🚨 DRISHTI
 
 ## Disaster Response Intelligence & Situational Tracking Interface
+## 🌐 Live Application
+
+[Launch DRISHTI](YOUR_WEBSITE_URL)
 
 DRISHTI is an AI-assisted disaster response and situational awareness platform designed to transform scattered emergency information into structured, prioritized, and actionable intelligence.
 
